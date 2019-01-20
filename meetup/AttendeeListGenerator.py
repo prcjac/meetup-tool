@@ -52,15 +52,29 @@ def attendeeListGenerator(apiKey, group):
         return 1
 
     renderEventDetails(event, rsvps)
+    return 0
 
 def renderEventDetails(event, rsvps):
-    print(event["group"]["name"])
-    print(event["name"])
-    print(event["local_time"] + " " + event["local_date"])
-    print()
+    title = event["name"] + " - " + event["local_time"] + " " + event["local_date"]
+    print("<html><head><title>%s</title><link rel=\"stylesheet\" href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css\"></head>" % title)
+    print("<body>")
+    print("<h1>%s</h1>" % title)
+    print("<h2>%s</h2>" % event["group"]["name"])
+    print("<table class=\"table table-striped\">")
+    print("<thead class=\"thead-dark\"><tr><th colspan=\"2\">Member</th><th>Guests</th><th>Status</th><th>Attended</th><th>Paid</th><th>Reconciled</th></tr></thead>")
+    print("<tbody>")
     for rsvp in  rsvps:
-        print(rsvp["member"]["name"] + " " + str(rsvp["guests"]) + (rsvp["member"]["photo"]["photo_link"] if "photo" in rsvp["member"] else " "))
-    pass
+        if rsvp["response"] != "no":
+            print("<tr><td>%s</td><td>%s</td><td>%d</td><td>%s</td><td></td><td></td><td></td></tr>" % (
+                "<img src=\"%s\"/>" % rsvp["member"]["photo"]["thumb_link"] if "photo" in rsvp["member"] else "",
+                rsvp["member"]["name"],
+                rsvp["guests"],
+                "Attending" if rsvp["response"] == "yes" else rsvp["response"]))
+    for i in range(0,5):
+        print("<tr><td>Additional %d:</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>" % (i + 1))
+    print("</tbody></table>")
+    print("<body>")
+    print("</html>")
 
 def printUsage():
     print("python3 " + sys.argv[0] + " MEETUP_API_KEY MEETUP_GROUP_NAME")
