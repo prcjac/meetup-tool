@@ -63,18 +63,39 @@ def renderEventDetails(event, rsvps):
     print("<table class=\"table table-striped\">")
     print("<thead class=\"thead-dark\"><tr><th colspan=\"2\">Member</th><th>Guests</th><th>Status</th><th>Attended</th><th>Paid</th><th>Reconciled</th></tr></thead>")
     print("<tbody>")
-    for rsvp in  rsvps:
-        if rsvp["response"] != "no":
-            print("<tr><td>%s</td><td>%s</td><td>%d</td><td>%s</td><td></td><td></td><td></td></tr>" % (
-                "<img src=\"%s\"/>" % rsvp["member"]["photo"]["thumb_link"] if "photo" in rsvp["member"] else "",
-                rsvp["member"]["name"],
-                rsvp["guests"],
-                "Attending" if rsvp["response"] == "yes" else rsvp["response"]))
+    attendees = [rsvp for rsvp in rsvps if rsvp["response"] == "yes"]
+    waitlists = [rsvp for rsvp in rsvps if rsvp["response"] == "waitlist"]
+
+    for rsvp in attendees:
+        renderRow(rsvp, "Attending")
+
+    for rsvp in waitlists:
+        renderRow(rsvp, "Waitlist")
+
     for i in range(0,5):
         print("<tr><td>Additional %d:</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>" % (i + 1))
+
+    attendeeCount = countRsvps(attendees)
+    waitlistCount = countRsvps(waitlists)
+
+    print("<tr><td><b>Total</b></td><td>Attending: %d, Waitlist: %d</td><td></td><td></td><td></td><td></td><td></td></tr>" % (attendeeCount, waitlistCount))
     print("</tbody></table>")
     print("<body>")
     print("</html>")
+
+def renderRow(rsvp, status):
+    print("<tr><td>%s</td><td>%s</td><td>%d</td><td>%s</td><td></td><td></td><td></td></tr>" % (
+        "<img src=\"%s\"/>" % rsvp["member"]["photo"]["thumb_link"] if "photo" in rsvp["member"] else "",
+        rsvp["member"]["name"],
+        rsvp["guests"],
+        status))
+
+def countRsvps(rsvps):
+    count = 0
+    for rsvp in rsvps:
+        count += 1
+        count += int(rsvp["guests"])
+    return count
 
 def printUsage():
     print("python3 " + sys.argv[0] + " MEETUP_API_KEY MEETUP_GROUP_NAME")
